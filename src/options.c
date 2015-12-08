@@ -942,12 +942,36 @@ static int opt_setKeyEvent( unsigned int wid, SDL_Event *event )
    int key;
    SDLMod mod, ev_mod;
    const char *str;
+   int test;
 
    /* See how to handle it. */
    switch (event->type) {
       case SDL_KEYDOWN:
          key  = event->key.keysym.sym;
          /* If control key make player hit twice. */
+         test =   (key == SDLK_NUMLOCK) ||
+                  (key == SDLK_CAPSLOCK) ||
+                  (key == SDLK_SCROLLOCK) ||
+                  (key == SDLK_RSHIFT) ||
+                  (key == SDLK_LSHIFT) ||
+                  (key == SDLK_RCTRL) ||
+                  (key == SDLK_LCTRL) ||
+                  (key == SDLK_RALT) ||
+                  (key == SDLK_LALT);
+         #if !SDL_VERSION_ATLEAST(2,0,0) /* SUPER don't exist in 2.0.0 */
+                  test  = test || 
+                          (key == SDLK_LSUPER) || 
+                          (key == SDLK_RSUPER);
+         #endif /* !SDL_VERSION_ATLEAST(2,0,0) */
+         test =   test ||
+                  (key == SDLK_RMETA) ||
+                  (key == SDLK_LMETA) && 
+                  (opt_lastKeyPress != key);
+         if (test) {
+            opt_lastKeyPress = key;
+            return 0;
+         }
+         
          if (((key == SDLK_NUMLOCK) ||
                   (key == SDLK_CAPSLOCK) ||
                   (key == SDLK_SCROLLOCK) ||
